@@ -1,1 +1,1 @@
-document.querySelector('.app').innerHTML = 'Parcel+TypeScript template'
+document.querySelector('.app')!.innerHTML = 'Parcel + TypeScript template'
