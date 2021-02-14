@@ -9,10 +9,99 @@
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Document</title>
-    <link rel="stylesheet" href="./index.scss" />
+    <link rel="stylesheet" href="index.scss" />
   </head>
   <body>
-    <div class="app"></div>
+    <h2>Plain texts</h2>
+    <h3>No line breaks</h3>
+    <section class="example">
+      <pre class="text text--small" contenteditable="true">
+aaaaaaaaaaaaaaaaaa</pre
+      >
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <pre class="text text--small" contenteditable="true">
+aaaaaaaaaaaaaaaaaaa</pre
+      >
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <pre class="text text--small" contenteditable="true">
+aaaaaaaaaaaaaaaaaaaa</pre
+      >
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <pre class="text text--small" contenteditable="true">
+aaaaaaaaaaaaaaaaaaaaa</pre
+      >
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <pre class="text text--small" contenteditable="true">
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</pre
+      >
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <pre class="text text--small" contenteditable="true">
+aaaaaaaaaaaaaaaaaaaa aaa aaaaaa aaaaaa aaa</pre
+      >
+      <pre class="output">FooBar</pre>
+    </section>
+    <h3>With line breaks</h3>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <pre class="text text--small" contenteditable="true">One
+line break</pre>
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <pre class="text text--small" contenteditable="true">Two
+line
+breaks</pre>
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <pre class="text text--small" contenteditable="true">Three sequential
+
+
+line breaks</pre>
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <pre class="text text--small" contenteditable="true">Three sequential
+
+
+line breaks
+
+
+repeated twice</pre>
+      <pre class="output">FooBar</pre>
+    </section>
+    <h2>Texts with markup</h2>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <div class="text text--small"><b>Bold text</b></div>
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <div class="text text--small">Several <b>bold</b> words <b>in text</b></div>
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <div class="text text--small"><p>  <em>Long text</em> sample with <em>newlines</em>
+and <b>bold</b> words
+
+<b>in it</b></p></div>
+      <pre class="output">FooBar</pre>
+    </section>
     <script src="index.ts"></script>
   </body>
 </html>

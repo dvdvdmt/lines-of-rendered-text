@@ -1,3 +1,50 @@
 * {
   box-sizing: border-box;
 }
+
+.text {
+  margin: 0;
+  white-space: break-spaces;
+  border: 1px solid lightgreen;
+  overflow: auto;
+  outline: none;
+  font-size: 13px;
+  font-family: 'Courier', 'monospace';
+
+  &::before {
+    position: absolute;
+    content: 'input';
+    transform: translateY(-110%);
+    font-weight: bold;
+  }
+}
+
+.text--small {
+  width: 150px;
+  max-height: 80px;
+}
+
+.example {
+  display: flex;
+  align-items: start;
+  margin-top: 20px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.output {
+  border: 1px solid lightgrey;
+  white-space: break-spaces;
+  margin: 0;
+  margin-left: 10px;
+  overflow: visible;
+
+  &::before {
+    position: absolute;
+    content: 'output';
+    transform: translateY(-110%);
+    font-weight: bold;
+  }
+}
