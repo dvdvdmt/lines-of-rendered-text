@@ -1,0 +1,1 @@
+An attempt to get a text with **rendered** lines from a DOM tree. It is a test and generalization of [this idea](https://stackoverflow.com/a/55605049/3167855). You can see [a demo here](https://lines-of-rendered-text.glitch.me/).
