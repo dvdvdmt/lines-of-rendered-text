@@ -107,6 +107,34 @@ and <b>bold words</b>
       <div class="text text--small" contenteditable="true"><h3>A list</h3><ul><li>With a long first item</li><li><b>and</b></li><li>short last one</li></ul></div>
       <pre class="output">FooBar</pre>
     </section>
+    <h2>Hieroglyphic writing and other 2 byte characters</h2>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <div class="text text--small" contenteditable="true">Emojis: ♠️♥️♣️♦️0️⃣1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟</div>
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <div class="text text--small" contenteditable="true">Japanese: 驚いた彼は道を走っていった。</div>
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <div class="text text--small" contenteditable="true">Korean: 가게에가셨어요?</div>
+      <pre class="output">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <div class="text text--small" contenteditable="true" dir='rtl'>Hebrew
+הוא אכל העוגה הוא אכל את העוגה</div>
+      <pre class="output" dir="rtl">FooBar</pre>
+    </section>
+    <section class="example">
+      <!-- prettier-ignore -->
+      <div class="text text--small" contenteditable="true" dir='rtl'>Arabic
+عندما ذهبت إلى المكتبة</div>
+      <pre class="output" dir="rtl">FooBar</pre>
+    </section>
     <script src="index.ts"></script>
   </body>
 </html>
