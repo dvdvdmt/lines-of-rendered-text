@@ -16,7 +16,7 @@ function linesOfNodeTree(root: HTMLElement) {
   )
   const nodesLines = textNodes.map(linesOfNode)
   console.log(`[nodesLines]`, nodesLines)
-  return glueEndLinesOfAdjacentNodesAndFlatten(nodesLines)
+  return connectLinesOfAdjacentTextBlocksAndFlatten(nodesLines)
 }
 
 function textNodesFor(node: HTMLElement): Node[] {
@@ -41,24 +41,35 @@ function textNodesFor(node: HTMLElement): Node[] {
   return result
 }
 
-function linesOfNode(node: Node): string[] {
+interface ITextBlock {
+  lines: string[]
+  firstLineBottom: number
+  lastLineBottom: number
+}
+
+function linesOfNode(node: Node): ITextBlock {
   let text = node.textContent || ''
   let prevCharIdx = 0
   let nextCharIdx = 1
   let lastFound = 0
   let nextBottom = 0
-  const result = []
   const range = document.createRange()
   range.setStart(node, 0)
   let prevBottom = range.getBoundingClientRect().bottom
+  const result: ITextBlock = {
+    lines: [],
+    firstLineBottom: prevBottom,
+    lastLineBottom: prevBottom,
+  }
   while (nextCharIdx <= text.length) {
     range.setEnd(node, nextCharIdx)
     nextBottom = range.getBoundingClientRect().bottom
     const isLineBreak = nextBottom > prevBottom
     if (isLineBreak) {
+      result.lastLineBottom = nextBottom
       console.log(`[str.charAt(prevChar)]`, text.charAt(prevCharIdx))
       console.log(`[str.charAt(nextChar)]`, text.charAt(nextCharIdx))
-      result.push(
+      result.lines.push(
         ...linesOfText(text.substr(lastFound, prevCharIdx - lastFound))
       )
       console.log(`[current]`, nextCharIdx)
@@ -71,27 +82,31 @@ function linesOfNode(node: Node): string[] {
   }
   // push the last line
   console.log(`[lastFound]`, lastFound)
-  result.push(text.substr(lastFound))
+  result.lines.push(...linesOfText(text.substr(lastFound)))
   return result
 }
 
-// [['a'], ['b'], ['c']] -> ['abc']
-// [['a', ''], ['bb'], ['c']] -> ['a', 'bbc']
-function glueEndLinesOfAdjacentNodesAndFlatten([
-  firstNodeLines,
-  ...restNodesLines
-]: string[][]): string[] {
-  const result: string[] = [...firstNodeLines]
-  restNodesLines.forEach((lines) => {
-    if (lines.length === 0) {
+function connectLinesOfAdjacentTextBlocksAndFlatten(
+  texts: ITextBlock[]
+): string[] {
+  const result: string[] = []
+  texts.forEach((text, i) => {
+    if (text.lines.length === 0) {
       return
     }
-    const [firstLine, ...restLines] = lines
-    const lastLineIdx = result.length - 1
-    if (result[lastLineIdx]) {
-      result[lastLineIdx] = result[lastLineIdx] + firstLine
+    if (i === 0) {
+      result.push(...text.lines)
+      return
     }
-    result.push(...restLines)
+    const prevText = texts[i - 1]
+    const [firstLine, ...restLines] = text.lines
+    const lastLineIdx = result.length - 1
+    if (prevText.lastLineBottom === text.firstLineBottom) {
+      result[lastLineIdx] = result[lastLineIdx] + firstLine
+      result.push(...restLines)
+    } else {
+      result.push(...text.lines)
+    }
   })
   return result
 }
@@ -100,7 +115,7 @@ function glueEndLinesOfAdjacentNodesAndFlatten([
 // ['abc', '', ''] -> ['abc', '']
 // ['abc', '', '', '', 'abc', ''] -> ['abc', '', '', 'abc']
 function linesOfText(text: string): string[] {
-  const lines = text.split(/\n/)
+  const lines = text.split('\n')
   let omitNextEmptyLine = true
   return lines.filter((line) => {
     if (!line && omitNextEmptyLine) {
