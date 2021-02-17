@@ -1,4 +1,4 @@
-import {getTextWithRenderedLineBreaks} from './get-text-with-rendered-line-breaks'
+import {textWithRenderedLineBreaks} from './text-with-rendered-line-breaks'
 
 window.onload = () => {
   Array.from(document.querySelectorAll<HTMLElement>('.example')).map(
@@ -13,8 +13,8 @@ function initExample($example: HTMLElement) {
   updateOutput()
 
   function updateOutput() {
-    const text = getTextWithRenderedLineBreaks($text)
+    const text = textWithRenderedLineBreaks($text)
     console.log(`[text]`, text)
-    $output.innerText = text
+    $output.innerHTML = text
   }
 }
