@@ -35,16 +35,30 @@
 }
 
 .output {
-  border: 1px solid lightgrey;
-  white-space: break-spaces;
   margin: 0;
   margin-left: 10px;
+  border: 1px solid lightgrey;
+
+  &::before {
+    content: '';
+    position: absolute;
+    transform: translateY(-112%);
+    font-weight: bold;
+  }
+}
+
+.output--plain-text {
+  border: 1px solid lightgrey;
+  white-space: break-spaces;
   overflow: visible;
 
   &::before {
-    position: absolute;
-    content: 'output';
-    transform: translateY(-110%);
-    font-weight: bold;
+    content: 'plain text';
+  }
+}
+
+.output--pixi {
+  &::before {
+    content: 'pixi';
   }
 }
