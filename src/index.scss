@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+canvas {
+  display: block;
+}
+
 .text {
   margin: 0;
   white-space: break-spaces;
@@ -35,6 +39,7 @@
 }
 
 .output {
+  min-width: 150px;
   margin: 0;
   margin-left: 10px;
   border: 1px solid lightgrey;

@@ -36,6 +36,8 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
   return lines.map((line) => {
     const result = {
       text: line,
+      x: relativeRect.x,
+      y: relativeRect.y + lineNumber * lineHeight,
       bottom: relativeRect.y + lineHeight + lineNumber * lineHeight,
     }
     lineNumber += 1
@@ -116,7 +118,12 @@ function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
     node.getBoundingClientRect(),
     root.getBoundingClientRect()
   )
-  return {text: '', bottom: relativeRect.bottom}
+  return {
+    text: '',
+    bottom: relativeRect.bottom,
+    x: relativeRect.x,
+    y: relativeRect.y,
+  }
 }
 
 function rectOfText(node: Text): DOMRect {
@@ -145,6 +152,8 @@ function rootRelativeRectOf(node: DOMRect, root: DOMRect): IRelativeRect {
 
 export interface ITextBlock {
   text: string
+  x: number
+  y: number
   bottom: number
 }
 
