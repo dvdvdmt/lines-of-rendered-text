@@ -48,7 +48,9 @@ function createStage($text: HTMLElement): PIXI.Stage {
       size: block.fontSize,
       bold: block.isBold,
       italic: block.isItalic,
+      underline: block.isUnderline,
       lineHeight: block.lineHeight,
+      color: block.color,
     })
     text.x = block.x
     text.y = block.y
