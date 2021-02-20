@@ -15,10 +15,7 @@ export function textBlocks(root: HTMLElement): ITextBlock[] {
 }
 
 function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
-  const relativeRect = rootRelativeRectOf(
-    rectOfText(node),
-    root.getBoundingClientRect()
-  )
+  const relativeRect = rootRelativeRectOf(rectOfText(node), root)
   const styles = getStylesOf(node, root)
   const lines = renderedTextLines(node)
   // DOMRect of a text node that contains new lines at the start has incorrect Y coordinate,
@@ -100,10 +97,7 @@ function getStylesOf(node: Text, fallback: HTMLElement): CSSStyleDeclaration {
 }
 
 function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
-  const relativeRect = rootRelativeRectOf(
-    node.getBoundingClientRect(),
-    root.getBoundingClientRect()
-  )
+  const relativeRect = rootRelativeRectOf(node.getBoundingClientRect(), root)
   return {
     text: '',
     bottom: relativeRect.bottom,
@@ -112,27 +106,30 @@ function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
   }
 }
 
-function rectOfText(node: Text): DOMRect {
+function rectOfText(node: Text): IRect {
   const range = document.createRange()
   range.setStart(node, 0)
   if (node.textContent) {
-    range.setEnd(node, node.textContent.length)
+    range.setEnd(node, node.textContent.length - 1)
   }
   return range.getBoundingClientRect()
 }
 
-interface IRelativeRect extends Omit<DOMRect, 'toJSON'> {}
+interface IRect extends Omit<DOMRect, 'toJSON'> {}
 
-function rootRelativeRectOf(node: DOMRect, root: DOMRect): IRelativeRect {
+function rootRelativeRectOf(node: IRect, root: HTMLElement): IRect {
+  const rootRect = root.getBoundingClientRect()
+  const y = node.y - rootRect.y + root.scrollTop
+  const x = node.x - rootRect.x + root.scrollLeft
   return {
-    height: node.height,
+    x,
+    y,
+    left: x,
+    right: x + node.width,
+    top: y,
+    bottom: y + node.height,
     width: node.width,
-    x: node.x - root.x,
-    y: node.y - root.y,
-    bottom: node.y - root.y + root.height,
-    top: node.y - root.y,
-    left: node.x - root.x,
-    right: node.x - root.x + node.width,
+    height: node.height,
   }
 }
 
