@@ -29,28 +29,37 @@ function initExample($example: HTMLElement) {
   }
 
   function renderRichText() {
-    if ($pixiOut) {
-      $pixiOut.textContent = ''
-      const blocks = textBlocks($text)
-      const renderer = new PIXI.CanvasRenderer(
-        $text.scrollWidth,
-        $text.scrollHeight
-      )
-      $pixiOut.appendChild(renderer.view)
-      const stage = new PIXI.Stage(0xffffff)
-      blocks.forEach((block) => {
-        const text = new PIXI.LiveText(block.text, {
-          font: 'monospace',
-          size: block.fontSize,
-          bold: block.isBold,
-          italic: block.isItalic,
-          lineHeight: block.lineHeight,
-        })
-        text.x = block.x
-        text.y = block.y
-        stage.addChild(text)
-      })
-      renderer.render(stage)
-    }
+    const renderer = createRenderer(
+      $pixiOut,
+      $text.scrollWidth,
+      $text.scrollHeight
+    )
+    const stage = createStage($text)
+    renderer.render(stage)
   }
+}
+
+function createStage($text: HTMLElement): PIXI.Stage {
+  const stage = new PIXI.Stage(0xffffff)
+  const blocks = textBlocks($text)
+  blocks.forEach((block) => {
+    const text = new PIXI.LiveText(block.text, {
+      font: 'monospace',
+      size: block.fontSize,
+      bold: block.isBold,
+      italic: block.isItalic,
+      lineHeight: block.lineHeight,
+    })
+    text.x = block.x
+    text.y = block.y
+    stage.addChild(text)
+  })
+  return stage
+}
+
+function createRenderer($pixiOut: HTMLElement, width: number, height: number) {
+  $pixiOut.textContent = ''
+  const renderer = new PIXI.CanvasRenderer(width, height)
+  $pixiOut.appendChild(renderer.view)
+  return renderer
 }
