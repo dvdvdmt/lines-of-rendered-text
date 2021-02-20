@@ -31,14 +31,13 @@ function initExample($example: HTMLElement) {
   function renderRichText() {
     if ($pixiOut) {
       $pixiOut.textContent = ''
-      const canvasSize = innerSizeOf($text)
+      const blocks = textBlocks($text)
       const renderer = new PIXI.CanvasRenderer(
-        canvasSize.width,
-        canvasSize.height
+        $text.scrollWidth,
+        $text.scrollHeight
       )
       $pixiOut.appendChild(renderer.view)
       const stage = new PIXI.Stage(0xffffff)
-      const blocks = textBlocks($text)
       blocks.forEach((block) => {
         const text = new PIXI.LiveText(block.text, {
           font: 'monospace',
@@ -51,11 +50,4 @@ function initExample($example: HTMLElement) {
       renderer.render(stage)
     }
   }
-}
-
-function innerSizeOf(element: HTMLElement): {width: number; height: number} {
-  const rect = element.getBoundingClientRect()
-  const styles = window.getComputedStyle(element)
-  const border = Number.parseInt(styles.borderWidth, 10)
-  return {width: rect.width - 2 * border, height: rect.height - 2 * border}
 }

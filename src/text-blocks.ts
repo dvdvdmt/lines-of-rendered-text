@@ -21,18 +21,11 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
   )
   const styles = getStylesOf(node, root)
   const lines = renderedTextLines(node)
-  const emptyLinesFromStart = calcEmptyLinesFromStart(lines)
-  const emptyLinesFromEnd = calcEmptyLinesFromEnd(lines)
-  let lineNumber = 0
-  const lineHeight = lineHeightFrom(
-    relativeRect.height,
-    lines.length,
-    emptyLinesFromStart,
-    emptyLinesFromEnd
-  )
   // DOMRect of a text node that contains new lines at the start has incorrect Y coordinate,
   // because it doesn't take new lines heights into account. We can overcome this by rewinding lineNumber position.
-  lineNumber -= lines.length > 1 ? emptyLinesFromStart : 0
+  let lineNumber = 0
+  lineNumber -= lines.length > 1 ? calcEmptyLinesFromStart(lines) : 0
+  const lineHeight = lineHeightOfText(node)
   return lines.map((line) => {
     const result = {
       text: line,
@@ -93,17 +86,10 @@ function linesOfText(text: string): string[] {
   })
 }
 
-function lineHeightFrom(
-  rectHeight: number,
-  linesTotal: number,
-  startEmptyLines: number,
-  endEmptyLines: number
-): number {
-  let divider = linesTotal - startEmptyLines - endEmptyLines
-  if (divider < 1) {
-    divider = 1
-  }
-  return rectHeight / divider
+function lineHeightOfText(node: Text): number {
+  const range = document.createRange()
+  range.setStart(node, 0)
+  return range.getBoundingClientRect().height
 }
 
 function getStylesOf(node: Text, fallback: HTMLElement): CSSStyleDeclaration {
@@ -161,18 +147,6 @@ function calcEmptyLinesFromStart(lines: string[]): number {
   let result = 0
   for (let line of lines) {
     if (line === '') {
-      result += 1
-    } else {
-      break
-    }
-  }
-  return result
-}
-
-function calcEmptyLinesFromEnd(lines: string[]): number {
-  let result = 0
-  for (let i = lines.length - 1; i >= 0; i--) {
-    if (lines[i] === '') {
       result += 1
     } else {
       break
