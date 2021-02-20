@@ -41,7 +41,10 @@ function initExample($example: HTMLElement) {
       blocks.forEach((block) => {
         const text = new PIXI.LiveText(block.text, {
           font: 'monospace',
-          size: 13,
+          size: block.fontSize,
+          bold: block.isBold,
+          italic: block.isItalic,
+          lineHeight: block.lineHeight,
         })
         text.x = block.x
         text.y = block.y

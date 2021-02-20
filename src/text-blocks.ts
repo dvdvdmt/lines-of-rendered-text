@@ -29,6 +29,10 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
       x: relativeRect.x,
       y: relativeRect.y + lineNumber * lineHeight,
       bottom: relativeRect.y + lineHeight + lineNumber * lineHeight,
+      lineHeight,
+      fontSize: Number.parseInt(styles.fontSize, 10),
+      isBold: Number.parseInt(styles.fontWeight, 10) === 700,
+      isItalic: styles.fontStyle === 'italic',
     }
     lineNumber += 1
     return result
@@ -103,6 +107,10 @@ function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
     bottom: relativeRect.bottom,
     x: relativeRect.x,
     y: relativeRect.y,
+    isBold: false,
+    isItalic: false,
+    fontSize: 0,
+    lineHeight: 0,
   }
 }
 
@@ -138,6 +146,10 @@ export interface ITextBlock {
   x: number
   y: number
   bottom: number
+  lineHeight: number
+  fontSize: number
+  isBold: boolean
+  isItalic: boolean
 }
 
 function calcEmptyLinesFromStart(lines: string[]): number {
