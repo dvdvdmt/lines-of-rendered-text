@@ -35,6 +35,7 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
       isBold: Number.parseInt(styles.fontWeight, 10) === 700,
       isItalic: styles.fontStyle === 'italic',
       isUnderline: styles.textDecorationLine === 'underline',
+      direction: styles.direction,
     }
     lineNumber += 1
     return result
@@ -115,6 +116,7 @@ function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
     fontSize: 0,
     lineHeight: 0,
     color: 'black',
+    direction: 'ltr',
   }
 }
 
@@ -153,6 +155,7 @@ export interface ITextBlock {
   lineHeight: number
   fontSize: number
   color: string
+  direction: string
   isUnderline: boolean
   isBold: boolean
   isItalic: boolean

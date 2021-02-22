@@ -51,6 +51,7 @@ function createStage($text: HTMLElement): PIXI.Stage {
       underline: block.isUnderline,
       lineHeight: block.lineHeight,
       color: block.color,
+      direction: block.direction, //TODO: Direction 'rtl' doesn't render text properly, need to find out why.
     })
     text.x = block.x
     text.y = block.y
