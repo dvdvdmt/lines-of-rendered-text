@@ -1,6 +1,7 @@
 import {textWithRenderedLineBreaks} from './text-with-rendered-line-breaks'
 import {PIXI} from './pixi.dev'
 import {textBlocks} from './text-blocks'
+import {listItemMarkers} from './list-items'
 
 window.onload = () => {
   Array.from(document.querySelectorAll<HTMLElement>('.example')).map(
@@ -41,8 +42,8 @@ function initExample($example: HTMLElement) {
 
 function createStage($text: HTMLElement): PIXI.Stage {
   const stage = new PIXI.Stage(0xffffff)
-  const blocks = textBlocks($text)
-  blocks.forEach((block) => {
+  const texts = textBlocks($text)
+  texts.forEach((block) => {
     const text = new PIXI.LiveText(block.text, {
       font: 'monospace',
       size: block.fontSize,
@@ -55,6 +56,17 @@ function createStage($text: HTMLElement): PIXI.Stage {
     })
     text.x = block.x
     text.y = block.y
+    stage.addChild(text)
+  })
+  const listMarkers = listItemMarkers($text)
+  listMarkers.forEach((marker) => {
+    const text = new PIXI.LiveText(marker.text, {
+      font: 'monospace',
+      size: marker.fontSize,
+      lineHeight: marker.lineHeight,
+    })
+    text.x = marker.x
+    text.y = marker.y
     stage.addChild(text)
   })
   return stage

@@ -1,4 +1,5 @@
 import {iteratorOverTextsAndBrElements} from './iterator-over-texts-and-br-elements'
+import {IRect, rootRelativeRectOf} from './relative-rect'
 
 export function textBlocks(root: HTMLElement): ITextBlock[] {
   const result = []
@@ -127,24 +128,6 @@ function rectOfText(node: Text): IRect {
     range.setEnd(node, node.textContent.length - 1)
   }
   return range.getBoundingClientRect()
-}
-
-interface IRect extends Omit<DOMRect, 'toJSON'> {}
-
-function rootRelativeRectOf(node: IRect, root: HTMLElement): IRect {
-  const rootRect = root.getBoundingClientRect()
-  const y = node.y - rootRect.y + root.scrollTop
-  const x = node.x - rootRect.x + root.scrollLeft
-  return {
-    x,
-    y,
-    left: x,
-    right: x + node.width,
-    top: y,
-    bottom: y + node.height,
-    width: node.width,
-    height: node.height,
-  }
 }
 
 export interface ITextBlock {
