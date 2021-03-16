@@ -1,4 +1,5 @@
-import {ITextBlock, textBlocks} from './text-blocks'
+import {textBlocks} from './text-blocks'
+import {ITextBlock} from './text-block'
 
 export function textWithRenderedLineBreaks(node: HTMLElement): string {
   const lines = linesOfNodeTree(node)

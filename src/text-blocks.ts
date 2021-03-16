@@ -1,5 +1,6 @@
 import {iteratorOverTextsAndBrElements} from './iterator-over-texts-and-br-elements'
 import {IRect, rootRelativeRectOf} from './relative-rect'
+import {createTextBlock, ITextBlock} from './text-block'
 
 export function textBlocks(root: HTMLElement): ITextBlock[] {
   const result = []
@@ -106,19 +107,11 @@ function getStylesOf(node: Text, fallback: HTMLElement): CSSStyleDeclaration {
 
 function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
   const relativeRect = rootRelativeRectOf(node.getBoundingClientRect(), root)
-  return {
-    text: '',
+  return createTextBlock({
     bottom: relativeRect.bottom,
     x: relativeRect.x,
     y: relativeRect.y,
-    isBold: false,
-    isItalic: false,
-    isUnderline: false,
-    fontSize: 0,
-    lineHeight: 0,
-    color: 'black',
-    direction: 'ltr',
-  }
+  })
 }
 
 function rectOfText(node: Text): IRect {
@@ -128,20 +121,6 @@ function rectOfText(node: Text): IRect {
     range.setEnd(node, node.textContent.length - 1)
   }
   return range.getBoundingClientRect()
-}
-
-export interface ITextBlock {
-  text: string
-  x: number
-  y: number
-  bottom: number
-  lineHeight: number
-  fontSize: number
-  color: string
-  direction: string
-  isUnderline: boolean
-  isBold: boolean
-  isItalic: boolean
 }
 
 function calcEmptyLinesFromStart(lines: string[]): number {
