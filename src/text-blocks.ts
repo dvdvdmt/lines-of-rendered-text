@@ -1,17 +1,21 @@
 import {iteratorOverTextsAndBrElements} from './iterator-over-texts-and-br-elements'
 import {IRect, rootRelativeRectOf} from './relative-rect'
 import {createTextBlock, ITextBlock} from './text-block'
+import {enrichBlocksWithHyperlinkOfNearestParent} from './enrich-blocks-with-hyperlink-of-nearest-parent'
 
 export function textBlocks(root: HTMLElement): ITextBlock[] {
   const result = []
   const iter = iteratorOverTextsAndBrElements(root)
-  let nextNode
-  while ((nextNode = iter.nextNode())) {
-    if (nextNode instanceof Text) {
-      result.push(...renderedTextBlocks(nextNode, root))
-    } else if (nextNode instanceof HTMLBRElement) {
-      result.push(brTextBlockOf(nextNode, root))
+  let node
+  while ((node = iter.nextNode())) {
+    const blocks = []
+    if (node instanceof Text) {
+      blocks.push(...renderedTextBlocks(node, root))
+    } else if (node instanceof HTMLBRElement) {
+      blocks.push(brTextBlockOf(node, root))
     }
+    enrichBlocksWithHyperlinkOfNearestParent(node, root, blocks)
+    result.push(...blocks)
   }
   return result
 }
@@ -26,10 +30,11 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
   lineNumber -= lines.length > 1 ? calcEmptyLinesFromStart(lines) : 0
   const lineHeight = lineHeightOfText(node)
   return lines.map((line) => {
-    const result = {
+    const result = createTextBlock({
       text: line,
       x: relativeRect.x,
       y: relativeRect.y + lineNumber * lineHeight,
+      width: relativeRect.width,
       bottom: relativeRect.y + lineHeight + lineNumber * lineHeight,
       lineHeight,
       fontSize: Number.parseInt(styles.fontSize, 10),
@@ -38,7 +43,7 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
       isItalic: styles.fontStyle === 'italic',
       isUnderline: styles.textDecorationLine === 'underline',
       direction: styles.direction,
-    }
+    })
     lineNumber += 1
     return result
   })

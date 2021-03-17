@@ -2,6 +2,8 @@ import {textWithRenderedLineBreaks} from './text-with-rendered-line-breaks'
 import {PIXI} from './pixi.dev'
 import {textBlocks} from './text-blocks'
 import {listItemMarkers} from './list-items'
+import {ITextBlock} from './text-block'
+import {getPointInLocalCoords, IPoint} from './get-point-in-local-coords'
 
 window.onload = () => {
   Array.from(document.querySelectorAll<HTMLElement>('.example')).map(
@@ -35,28 +37,46 @@ function initExample($example: HTMLElement) {
       $text.scrollWidth,
       $text.scrollHeight
     )
-    const stage = createStage($text)
+    const {stage, onClick} = createStage($text)
+    renderer.view.addEventListener('click', (e) => {
+      const point = getPointInLocalCoords(renderer.view, e)
+      onClick(point)
+    })
     renderer.render(stage)
   }
 }
 
-function createStage($text: HTMLElement): PIXI.Stage {
+function createLiveText(block: ITextBlock) {
+  let result = new PIXI.LiveText(block.text, {
+    font: 'monospace',
+    size: block.fontSize,
+    bold: block.isBold,
+    italic: block.isItalic,
+    underline: block.isUnderline,
+    lineHeight: block.lineHeight,
+    color: block.color,
+    direction: block.direction, //TODO: Direction 'rtl' doesn't render text properly, need to find out why.
+  })
+  result.x = block.x
+  result.y = block.y
+  return result
+}
+
+function createStage(
+  $text: HTMLElement
+): {stage: PIXI.Stage; onClick: (point: IPoint) => void} {
   const stage = new PIXI.Stage(0xffffff)
   const texts = textBlocks($text)
+  const rectToUrl = new Map<PIXI.Rectangle, string>()
   texts.forEach((block) => {
-    const text = new PIXI.LiveText(block.text, {
-      font: 'monospace',
-      size: block.fontSize,
-      bold: block.isBold,
-      italic: block.isItalic,
-      underline: block.isUnderline,
-      lineHeight: block.lineHeight,
-      color: block.color,
-      direction: block.direction, //TODO: Direction 'rtl' doesn't render text properly, need to find out why.
-    })
-    text.x = block.x
-    text.y = block.y
+    const text = createLiveText(block)
     stage.addChild(text)
+    if (block.link) {
+      rectToUrl.set(
+        new PIXI.Rectangle(block.x, block.y, block.width, block.lineHeight),
+        block.link
+      )
+    }
   })
   const listMarkers = listItemMarkers($text)
   listMarkers.forEach((marker) => {
@@ -69,7 +89,17 @@ function createStage($text: HTMLElement): PIXI.Stage {
     text.y = marker.y
     stage.addChild(text)
   })
-  return stage
+  return {
+    stage,
+    onClick(point) {
+      const clicked = Array.from(rectToUrl.keys()).find((rect) =>
+        rect.contains(point.x, point.y)
+      )
+      if (clicked) {
+        window.open(rectToUrl.get(clicked), '_blank')
+      }
+    },
+  }
 }
 
 function createRenderer($pixiOut: HTMLElement, width: number, height: number) {
