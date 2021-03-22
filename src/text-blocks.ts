@@ -21,9 +21,9 @@ export function textBlocks(root: HTMLElement): ITextBlock[] {
 }
 
 function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
-  const relativeRect = rootRelativeRectOf(rectOfText(node), root)
+  const relativeRect = rootRelativeRectOf(textRect(node), root)
   const styles = getStylesOf(node, root)
-  const lines = renderedTextLines(node)
+  const lines = renderedTextLines(node, root)
   // DOMRect of a text node that contains new lines at the start has incorrect Y coordinate,
   // because it doesn't take new lines heights into account. We can overcome this by rewinding lineNumber position.
   let lineNumber = 0
@@ -31,9 +31,7 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
   const lineHeight = lineHeightOfText(node)
   return lines.map((line) => {
     const result = createTextBlock({
-      text: line,
-      x: relativeRect.x,
-      y: relativeRect.y + lineNumber * lineHeight,
+      ...line,
       width: relativeRect.width,
       bottom: relativeRect.y + lineHeight + lineNumber * lineHeight,
       lineHeight,
@@ -49,37 +47,45 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
   })
 }
 
-function renderedTextLines(node: Text): string[] {
+interface ILine {
+  text: string
+  x: number
+  y: number
+}
+function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
   let text = node.textContent || ''
-  let prevCharIdx = 0
-  let nextCharIdx = 1
-  let lastFound = 0
+  let lineStartIdx = 0
+  let testCharIdx = 1
   const range = document.createRange()
-  range.setStart(node, 0)
-  let prevRect = range.getBoundingClientRect()
-  const result = []
-  while (nextCharIdx <= text.length) {
-    range.setEnd(node, nextCharIdx)
-    let nextRect = range.getBoundingClientRect()
-    const isLineBreak = nextRect.bottom > prevRect.bottom
+  range.setStart(node, lineStartIdx)
+  let lineRect = range.getBoundingClientRect()
+  const result: ReturnType<typeof renderedTextLines> = []
+  while (testCharIdx <= text.length) {
+    range.setEnd(node, testCharIdx)
+    let testRect = range.getBoundingClientRect()
+    const isLineBreak = testRect.bottom > lineRect.bottom
     if (isLineBreak) {
+      const lineEndIdx = testCharIdx - 1
       result.push(
-        ...linesOfText(text.substr(lastFound, prevCharIdx - lastFound))
+        ...splitToLines(text.substring(lineStartIdx, lineEndIdx)).map(
+          toLine(rootRelativeRectOf(lineRect, root))
+        )
       )
-      prevRect = nextRect
-      lastFound = prevCharIdx
+      lineStartIdx = lineEndIdx
+      range.setStart(node, lineStartIdx)
+      lineRect = range.getBoundingClientRect()
     }
-    prevCharIdx = nextCharIdx
-    nextCharIdx += 1
+    testCharIdx += 1
   }
-  result.push(...linesOfText(text.substr(lastFound)))
+  result.push(
+    ...splitToLines(text.substring(lineStartIdx)).map(
+      toLine(rootRelativeRectOf(lineRect, root))
+    )
+  )
   return result
 }
 
-// ['', '', ''] -> ['', '']
-// ['abc', '', ''] -> ['abc', '']
-// ['abc', '', '', '', 'abc', ''] -> ['abc', '', '', 'abc']
-function linesOfText(text: string): string[] {
+function splitToLines(text: string): string[] {
   const lines = text.split('\n')
   if (lines.length === 1) {
     return lines
@@ -95,6 +101,16 @@ function linesOfText(text: string): string[] {
     }
     return true
   })
+}
+
+function toLine(rect: IRect): (text: string, lineNumber: number) => ILine {
+  return (line: string, lineNumber: number): ILine => {
+    return {
+      text: line,
+      x: rect.x,
+      y: rect.y + lineNumber * rect.height,
+    }
+  }
 }
 
 function lineHeightOfText(node: Text): number {
@@ -119,7 +135,7 @@ function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
   })
 }
 
-function rectOfText(node: Text): IRect {
+function textRect(node: Text): DOMRect {
   const range = document.createRange()
   range.setStart(node, 0)
   if (node.textContent) {
@@ -128,10 +144,10 @@ function rectOfText(node: Text): IRect {
   return range.getBoundingClientRect()
 }
 
-function calcEmptyLinesFromStart(lines: string[]): number {
+function calcEmptyLinesFromStart(lines: ILine[]): number {
   let result = 0
   for (let line of lines) {
-    if (line === '') {
+    if (line.text === '') {
       result += 1
     } else {
       break
