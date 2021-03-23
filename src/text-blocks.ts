@@ -67,7 +67,7 @@ function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
         )
       )
       lineStartIdx = lineEndIdx
-      lineRect = getRectInNode(lineStartIdx, lineStartIdx)
+      lineRect = getRectInNode(lineStartIdx, testCharIdx)
     }
     testCharIdx += 1
   }
