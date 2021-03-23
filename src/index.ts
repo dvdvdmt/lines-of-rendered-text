@@ -55,7 +55,7 @@ function createLiveText(block: ITextBlock) {
     underline: block.isUnderline,
     lineHeight: block.height,
     color: block.color,
-    direction: block.direction, //TODO: Direction 'rtl' doesn't render text properly, need to find out why.
+    direction: block.direction,
   })
   result.x = block.x
   result.y = block.y

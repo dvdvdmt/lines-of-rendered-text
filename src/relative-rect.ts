@@ -8,7 +8,7 @@ export function rootRelativeRectOf(node: IRect, root: HTMLElement): IRect {
     x,
     y,
     left: x,
-    right: x + node.width,
+    right: node.right - x,
     top: y,
     bottom: y + node.height,
     width: node.width,

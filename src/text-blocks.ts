@@ -51,30 +51,29 @@ function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
   let text = node.textContent || ''
   let lineStartIdx = 0
   let testCharIdx = 1
-  const range = document.createRange()
-  range.setStart(node, lineStartIdx)
-  let lineRect = range.getBoundingClientRect()
+  const getRectInNode = getRectIn(node)
+  let lineRect = getRectInNode(lineStartIdx, lineStartIdx)
   const result: ReturnType<typeof renderedTextLines> = []
   while (testCharIdx <= text.length) {
-    range.setEnd(node, testCharIdx)
-    let testRect = range.getBoundingClientRect()
+    const testRect = getRectInNode(lineStartIdx, testCharIdx)
     const isLineBreak = testRect.bottom > lineRect.bottom
     if (isLineBreak) {
       const lineEndIdx = testCharIdx - 1
       result.push(
         ...splitToLines(text.substring(lineStartIdx, lineEndIdx)).map(
-          toLine(rootRelativeRectOf(lineRect, root))
+          toLine(
+            rootRelativeRectOf(getRectInNode(lineStartIdx, lineEndIdx), root)
+          )
         )
       )
       lineStartIdx = lineEndIdx
-      range.setStart(node, lineStartIdx)
-      lineRect = range.getBoundingClientRect()
+      lineRect = getRectInNode(lineStartIdx, lineStartIdx)
     }
     testCharIdx += 1
   }
   result.push(
     ...splitToLines(text.substring(lineStartIdx)).map(
-      toLine(rootRelativeRectOf(lineRect, root))
+      toLine(rootRelativeRectOf(getRectInNode(lineStartIdx, text.length), root))
     )
   )
   return result
@@ -125,4 +124,13 @@ function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
     x: relativeRect.x,
     y: relativeRect.y,
   })
+}
+
+function getRectIn(node: Text) {
+  const range = document.createRange()
+  return function getRect(start: number, end: number) {
+    range.setStart(node, start)
+    range.setEnd(node, end)
+    return range.getBoundingClientRect()
+  }
 }
