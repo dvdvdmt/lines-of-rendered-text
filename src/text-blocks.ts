@@ -51,29 +51,27 @@ function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
   let text = node.textContent || ''
   let lineStartIdx = 0
   let testCharIdx = 1
-  const getRectInNode = getRectIn(node)
-  let lineRect = getRectInNode(lineStartIdx, lineStartIdx)
+  const selectRect = rectIn(node)
+  let lineRect = selectRect(lineStartIdx, lineStartIdx)
   const result: ReturnType<typeof renderedTextLines> = []
   while (testCharIdx <= text.length) {
-    const testRect = getRectInNode(lineStartIdx, testCharIdx)
+    const testRect = selectRect(lineStartIdx, testCharIdx)
     const isLineBreak = testRect.bottom > lineRect.bottom
     if (isLineBreak) {
       const lineEndIdx = testCharIdx - 1
       result.push(
         ...splitToLines(text.substring(lineStartIdx, lineEndIdx)).map(
-          toLine(
-            rootRelativeRectOf(getRectInNode(lineStartIdx, lineEndIdx), root)
-          )
+          toLine(rootRelativeRectOf(selectRect(lineStartIdx, lineEndIdx), root))
         )
       )
       lineStartIdx = lineEndIdx
-      lineRect = getRectInNode(lineStartIdx, testCharIdx)
+      lineRect = selectRect(lineStartIdx, testCharIdx)
     }
     testCharIdx += 1
   }
   result.push(
     ...splitToLines(text.substring(lineStartIdx)).map(
-      toLine(rootRelativeRectOf(getRectInNode(lineStartIdx, text.length), root))
+      toLine(rootRelativeRectOf(selectRect(lineStartIdx, text.length), root))
     )
   )
   return result
@@ -97,7 +95,7 @@ function splitToLines(text: string): string[] {
   })
 }
 
-function toLine(rect: IRect): (text: string, lineNumber: number) => ILine {
+function toLine(rect: IRect) {
   return (line: string, lineNumber: number): ILine => {
     return {
       text: line,
@@ -126,9 +124,9 @@ function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
   })
 }
 
-function getRectIn(node: Text) {
+function rectIn(node: Text) {
   const range = document.createRange()
-  return function getRect(start: number, end: number) {
+  return function selectRect(start: number, end: number): IRect {
     range.setStart(node, start)
     range.setEnd(node, end)
     return range.getBoundingClientRect()
