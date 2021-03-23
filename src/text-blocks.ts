@@ -21,18 +21,13 @@ export function textBlocks(root: HTMLElement): ITextBlock[] {
 }
 
 function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
-  const relativeRect = rootRelativeRectOf(textRect(node), root)
   const styles = getStylesOf(node, root)
   const lines = renderedTextLines(node, root)
   // DOMRect of a text node that contains new lines at the start has incorrect Y coordinate,
   // because it doesn't take new lines heights into account. We can overcome this by rewinding lineNumber position.
-  let lineNumber = 0
-  lineNumber -= lines.length > 1 ? calcEmptyLinesFromStart(lines) : 0
-  const lineHeight = lineHeightOfText(node)
   return lines.map((line) => {
     const result = createTextBlock({
       ...line,
-      bottom: relativeRect.y + lineHeight + lineNumber * lineHeight,
       fontSize: Number.parseInt(styles.fontSize, 10),
       color: styles.color,
       isBold: Number.parseInt(styles.fontWeight, 10) === 700,
@@ -40,7 +35,6 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
       isUnderline: styles.textDecorationLine === 'underline',
       direction: styles.direction,
     })
-    lineNumber += 1
     return result
   })
 }
@@ -51,6 +45,7 @@ interface ILine {
   y: number
   width: number
   height: number
+  bottom: number
 }
 function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
   let text = node.textContent || ''
@@ -111,14 +106,9 @@ function toLine(rect: IRect): (text: string, lineNumber: number) => ILine {
       y: rect.y + lineNumber * rect.height,
       width: rect.width,
       height: rect.height,
+      bottom: rect.bottom + lineNumber * rect.height,
     }
   }
-}
-
-function lineHeightOfText(node: Text): number {
-  const range = document.createRange()
-  range.setStart(node, 0)
-  return range.getBoundingClientRect().height
 }
 
 function getStylesOf(node: Text, fallback: HTMLElement): CSSStyleDeclaration {
@@ -135,25 +125,4 @@ function brTextBlockOf(node: HTMLBRElement, root: HTMLElement): ITextBlock {
     x: relativeRect.x,
     y: relativeRect.y,
   })
-}
-
-function textRect(node: Text): DOMRect {
-  const range = document.createRange()
-  range.setStart(node, 0)
-  if (node.textContent) {
-    range.setEnd(node, node.textContent.length - 1)
-  }
-  return range.getBoundingClientRect()
-}
-
-function calcEmptyLinesFromStart(lines: ILine[]): number {
-  let result = 0
-  for (let line of lines) {
-    if (line.text === '') {
-      result += 1
-    } else {
-      break
-    }
-  }
-  return result
 }
