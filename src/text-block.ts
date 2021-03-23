@@ -3,8 +3,8 @@ export interface ITextBlock {
   x: number
   y: number
   width: number
+  height: number
   bottom: number
-  lineHeight: number
   fontSize: number
   color: string
   direction: string
@@ -20,11 +20,11 @@ const defaultTextBlock = {
   x: 0,
   y: 0,
   width: 0,
+  height: 0,
   isBold: false,
   isItalic: false,
   isUnderline: false,
   fontSize: 0,
-  lineHeight: 0,
   color: 'black',
   direction: 'ltr',
   link: '',

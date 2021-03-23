@@ -53,7 +53,7 @@ function createLiveText(block: ITextBlock) {
     bold: block.isBold,
     italic: block.isItalic,
     underline: block.isUnderline,
-    lineHeight: block.lineHeight,
+    lineHeight: block.height,
     color: block.color,
     direction: block.direction, //TODO: Direction 'rtl' doesn't render text properly, need to find out why.
   })
@@ -73,7 +73,7 @@ function createStage(
     stage.addChild(text)
     if (block.link) {
       rectToUrl.set(
-        new PIXI.Rectangle(block.x, block.y, block.width, block.lineHeight),
+        new PIXI.Rectangle(block.x, block.y, block.width, block.height),
         block.link
       )
     }

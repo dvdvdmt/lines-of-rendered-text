@@ -32,9 +32,7 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
   return lines.map((line) => {
     const result = createTextBlock({
       ...line,
-      width: relativeRect.width,
       bottom: relativeRect.y + lineHeight + lineNumber * lineHeight,
-      lineHeight,
       fontSize: Number.parseInt(styles.fontSize, 10),
       color: styles.color,
       isBold: Number.parseInt(styles.fontWeight, 10) === 700,
@@ -51,6 +49,8 @@ interface ILine {
   text: string
   x: number
   y: number
+  width: number
+  height: number
 }
 function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
   let text = node.textContent || ''
@@ -109,6 +109,8 @@ function toLine(rect: IRect): (text: string, lineNumber: number) => ILine {
       text: line,
       x: rect.x,
       y: rect.y + lineNumber * rect.height,
+      width: rect.width,
+      height: rect.height,
     }
   }
 }
