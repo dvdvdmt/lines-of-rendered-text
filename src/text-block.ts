@@ -1,5 +1,6 @@
 export interface ITextBlock {
   text: string
+  renderedText: string
   x: number
   y: number
   width: number
@@ -16,6 +17,7 @@ export interface ITextBlock {
 
 const defaultTextBlock = {
   text: '',
+  renderedText: '',
   bottom: 0,
   x: 0,
   y: 0,

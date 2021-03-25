@@ -1,5 +1,5 @@
 import {iteratorOverTextsAndBrElements} from './iterator-over-texts-and-br-elements'
-import {IRect, rootRelativeRectOf} from './relative-rect'
+import {IRect, rectRelativeTo, rootRelativeRectOf} from './relative-rect'
 import {createTextBlock, ITextBlock} from './text-block'
 import {enrichBlocksWithHyperlinkOfNearestParent} from './enrich-blocks-with-hyperlink-of-nearest-parent'
 
@@ -41,70 +41,87 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
 
 interface ILine {
   text: string
+  renderedText: string
   x: number
   y: number
   width: number
   height: number
   bottom: number
 }
+
+interface IChar {
+  text: string
+  rect: IRect
+}
+
 function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
   let text = node.textContent || ''
-  let lineStartIdx = 0
-  let testCharIdx = 1
   const selectRect = rectIn(node)
-  let lineRect = selectRect(lineStartIdx, lineStartIdx)
+  const rootRelativeRect = rectRelativeTo(root)
+  const chars = Array.from(text).map<IChar>((char, i) => {
+    return {
+      text: char === '\n' ? '' : char,
+      rect: rootRelativeRect(selectRect(i, i + 1)),
+    }
+  })
+  let lineStartIdx = 0
+  let nextCharIdx = 1
   const result: ReturnType<typeof renderedTextLines> = []
-  while (testCharIdx <= text.length) {
-    const testRect = selectRect(lineStartIdx, testCharIdx)
-    const isLineBreak = testRect.bottom > lineRect.bottom
+  while (nextCharIdx < chars.length) {
+    let prevRect = chars[nextCharIdx - 1].rect
+    const nextRect = chars[nextCharIdx].rect
+    const isLineBreak = nextRect.bottom > prevRect.bottom
     if (isLineBreak) {
-      const lineEndIdx = testCharIdx - 1
       result.push(
-        ...splitToLines(text.substring(lineStartIdx, lineEndIdx)).map(
-          toLine(rootRelativeRectOf(selectRect(lineStartIdx, lineEndIdx), root))
+        charsToLine(
+          chars.slice(lineStartIdx, nextCharIdx),
+          rootRelativeRect(selectRect(lineStartIdx, nextCharIdx))
         )
       )
-      lineStartIdx = lineEndIdx
-      lineRect = selectRect(lineStartIdx, testCharIdx)
+      lineStartIdx = nextCharIdx
     }
-    testCharIdx += 1
+    nextCharIdx += 1
   }
   result.push(
-    ...splitToLines(text.substring(lineStartIdx)).map(
-      toLine(rootRelativeRectOf(selectRect(lineStartIdx, text.length), root))
+    charsToLine(
+      chars.slice(lineStartIdx),
+      rootRelativeRect(selectRect(lineStartIdx, chars.length))
     )
   )
   return result
 }
 
-function splitToLines(text: string): string[] {
-  const lines = text.split('\n')
-  if (lines.length === 1) {
-    return lines
-  }
-  let omitNextEmptyLine = true
-  return lines.filter((line) => {
-    if (!line && omitNextEmptyLine) {
-      omitNextEmptyLine = false
-      return false
+const rtlCharRegExp = new RegExp('^[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]$')
+function charsToLine(chars: IChar[], lineRect: IRect): ILine {
+  const text = chars.reduce((acc, char) => acc + char.text, '')
+  chars.sort((a, b) => {
+    const aIsRtlChar = rtlCharRegExp.test(a.text)
+    const bIsRtlChar = rtlCharRegExp.test(b.text)
+    if (aIsRtlChar && bIsRtlChar) {
+      if (a.rect.x < b.rect.x) {
+        return 1
+      } else if (a.rect.x === b.rect.x) {
+        return 0
+      }
+      return -1
     }
-    if (line) {
-      omitNextEmptyLine = true
-    }
-    return true
-  })
-}
 
-function toLine(rect: IRect) {
-  return (line: string, lineNumber: number): ILine => {
-    return {
-      text: line,
-      x: rect.x,
-      y: rect.y + lineNumber * rect.height,
-      width: rect.width,
-      height: rect.height,
-      bottom: rect.bottom + lineNumber * rect.height,
+    if (a.rect.x < b.rect.x) {
+      return -1
+    } else if (a.rect.x === b.rect.x) {
+      return 0
     }
+    return 1
+  })
+  const renderedText = chars.reduce((acc, char) => acc + char.text, '')
+  return {
+    text,
+    renderedText,
+    x: lineRect.x,
+    y: lineRect.y,
+    width: lineRect.width,
+    height: lineRect.height,
+    bottom: lineRect.bottom,
   }
 }
 
