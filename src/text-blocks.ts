@@ -91,21 +91,12 @@ function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
   return result
 }
 
-const rtlCharRegExp = new RegExp('^[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]$')
+const rtlCharOrSpaceRegExp = new RegExp(
+  '^[ \u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]$'
+)
 function charsToLine(chars: IChar[], lineRect: IRect): ILine {
   const text = chars.reduce((acc, char) => acc + char.text, '')
   chars.sort((a, b) => {
-    const aIsRtlChar = rtlCharRegExp.test(a.text)
-    const bIsRtlChar = rtlCharRegExp.test(b.text)
-    if (aIsRtlChar && bIsRtlChar) {
-      if (a.rect.x < b.rect.x) {
-        return 1
-      } else if (a.rect.x === b.rect.x) {
-        return 0
-      }
-      return -1
-    }
-
     if (a.rect.x < b.rect.x) {
       return -1
     } else if (a.rect.x === b.rect.x) {
@@ -113,16 +104,46 @@ function charsToLine(chars: IChar[], lineRect: IRect): ILine {
     }
     return 1
   })
-  const renderedText = chars.reduce((acc, char) => acc + char.text, '')
   return {
     text,
-    renderedText,
+    renderedText: charsToRenderedText(chars),
     x: lineRect.x,
     y: lineRect.y,
     width: lineRect.width,
     height: lineRect.height,
     bottom: lineRect.bottom,
   }
+}
+
+function charsToRenderedText(chars: IChar[]): string {
+  /**
+   * NOTE:
+   * Joining RTL characters to string using their rendered order produces a problem.
+   * The resulting string will be reversed when we will try to render it on a screen.
+   *
+   * For example:
+   * A word "one" in Arabic will be "واحد" .
+   * Here are characters that form this word separated by space د ح ا و .
+   * If we try to remove inner spaces in order to form initial string then we get دحاو
+   * which is different from initial .واحد
+   *
+   * This function fixes this and reverses all RTL words in the resulting string.
+   * */
+  let rtlWord = ''
+  return (
+    chars.reduce((acc, char) => {
+      if (rtlCharOrSpaceRegExp.test(char.text)) {
+        rtlWord = char.text + rtlWord
+        return acc
+      }
+      if (rtlWord) {
+        const result = acc + rtlWord + char.text
+        rtlWord = ''
+        return result
+      }
+      return acc + char.text
+    }, '') + rtlWord
+  )
 }
 
 function getStylesOf(node: Text, fallback: HTMLElement): CSSStyleDeclaration {
