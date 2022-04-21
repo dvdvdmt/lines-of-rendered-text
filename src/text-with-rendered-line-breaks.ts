@@ -1,4 +1,4 @@
-import {textBlocks} from './text-blocks'
+import {NEXTLINE_DIFFERENCE, textBlocks} from './text-blocks'
 import {ITextBlock} from './text-block'
 
 export function textWithRenderedLineBreaks(node: HTMLElement): string {
@@ -20,7 +20,7 @@ export function textLinesOf(blocks: ITextBlock[]): string[] {
     }
     const prevBlock = blocks[i - 1]
     const lastLineIdx = result.length - 1
-    if (prevBlock.bottom === block.bottom) {
+    if (Math.abs(prevBlock.bottom - block.bottom) < NEXTLINE_DIFFERENCE) {
       result[lastLineIdx] = result[lastLineIdx] + block.text
     } else {
       result.push(block.text)

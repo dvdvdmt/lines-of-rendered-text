@@ -48,7 +48,7 @@ function initExample($example: HTMLElement) {
 
 function createLiveText(block: ITextBlock) {
   let result = new PIXI.LiveText(block.renderedText, {
-    font: 'monospace',
+    font: 'Roboto',
     size: block.fontSize,
     bold: block.isBold,
     italic: block.isItalic,

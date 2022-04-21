@@ -3,6 +3,8 @@ import {IRect, rectRelativeTo, rootRelativeRectOf} from './relative-rect'
 import {createTextBlock, ITextBlock} from './text-block'
 import {enrichBlocksWithHyperlinkOfNearestParent} from './enrich-blocks-with-hyperlink-of-nearest-parent'
 
+export const NEXTLINE_DIFFERENCE = 0.1
+
 export function textBlocks(root: HTMLElement): ITextBlock[] {
   const result = []
   const iter = iteratorOverTextsAndBrElements(root)
@@ -30,7 +32,7 @@ function renderedTextBlocks(node: Text, root: HTMLElement): ITextBlock[] {
       ...line,
       fontSize: Number.parseInt(styles.fontSize, 10),
       color: styles.color,
-      isBold: Number.parseInt(styles.fontWeight, 10) === 700,
+      isBold: Number.parseInt(styles.fontWeight, 10) === 700 || styles.fontWeight?.toLowerCase() === 'bold',
       isItalic: styles.fontStyle === 'italic',
       isUnderline: styles.textDecorationLine === 'underline',
       direction: styles.direction,
@@ -70,7 +72,7 @@ function renderedTextLines(node: Text, root: HTMLElement): ILine[] {
   while (nextCharIdx < chars.length) {
     let prevRect = chars[nextCharIdx - 1].rect
     const nextRect = chars[nextCharIdx].rect
-    const isLineBreak = nextRect.bottom > prevRect.bottom
+    const isLineBreak = (nextRect.bottom - prevRect.bottom) > NEXTLINE_DIFFERENCE
     if (isLineBreak) {
       result.push(
         charsToLine(
